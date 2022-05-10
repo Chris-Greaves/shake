@@ -1,8 +1,9 @@
 ﻿using shake.core;
 using System.CommandLine;
 
-var deviceOpt = new Option<string>("--device", getDefaultValue: () => "default", description: "The audio device to keep awake");
-var delayOpt = new Option<int>("--delay", getDefaultValue: () => 5, description: "The delay between audio cues");
+var deviceOpt = new Option<int>("--device", description: "The audio device to keep awake. For Device list with device numbers see 'shake audio list'");
+var delayOpt = new Option<int>("--delay", getDefaultValue: () => 5, description: "The delay between audio cues in seconds");
+var testOpt = new Option<bool>("--test", getDefaultValue: () => false, description: "Switch to use the audiable file to test it works");
 
 var listAudioCmd = new Command("list", description: "List audio devices to keep awake");
 
@@ -18,15 +19,17 @@ var audioCmd = new Command("audio", description: "Keep and audio device Awake by
 {
     deviceOpt,
     delayOpt,
+    testOpt,
     listAudioCmd
 };
 
-audioCmd.SetHandler((string device, int delay) =>
+audioCmd.SetHandler( async (int device, int delay, bool test, CancellationToken token) =>
 {
-    Console.WriteLine("Set Audio Device to keep awake called");
-    Console.WriteLine($"Selected Device: {device}");
+    Console.WriteLine($"Selected Device: {AudioUtils.GetAudioDeviceName(device)}");
     Console.WriteLine($"Selected Delay: {delay}");
-}, deviceOpt, delayOpt);
+
+    await AudioUtils.LoopAudioWithDelay(device, delay, test, token);
+}, deviceOpt, delayOpt, testOpt);
 
 var root = new RootCommand
 {

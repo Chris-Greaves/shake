@@ -1,4 +1,4 @@
-﻿using shake.core;
+﻿using Shake.Core;
 using System.CommandLine;
 
 var deviceOpt = new Option<int>("--device", description: "The audio device to keep awake. For Device list with device numbers see 'shake audio list'");

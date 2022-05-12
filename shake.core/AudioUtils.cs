@@ -1,6 +1,6 @@
 ﻿using NAudio.Wave;
 
-namespace shake.core
+namespace Shake.Core
 {
     public static class AudioUtils
     {

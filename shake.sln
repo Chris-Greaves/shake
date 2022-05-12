@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shake-cli", "shake-cli\shake-cli.csproj", "{63FFCE12-C501-4CDA-B413-13E4900D2AF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shake.CLI", "shake-cli\Shake.CLI.csproj", "{63FFCE12-C501-4CDA-B413-13E4900D2AF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "shake.core", "shake.core\shake.core.csproj", "{16C475B2-33DD-4B2F-BA06-1CC846EC90D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shake.Core", "shake.core\Shake.Core.csproj", "{16C475B2-33DD-4B2F-BA06-1CC846EC90D4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

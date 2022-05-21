@@ -2,7 +2,7 @@
   "profiles": {
     "shake-cli": {
       "commandName": "Project",
-      "commandLineArgs": "audio --device 0 --test"
+      "commandLineArgs": "screen --display"
     }
   }
 }

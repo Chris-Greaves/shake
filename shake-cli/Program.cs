@@ -1,11 +1,13 @@
 ﻿using Shake.Core;
 using System.CommandLine;
 
-var aduioCmd = CreateAudioCommand();
+var audioCmd = CreateAudioCommand();
+var screenCmd = CreateScreenCommand();
 
 var root = new RootCommand
 {
-    audioCmd
+    audioCmd,
+    screenCmd
 };
 
 return root.Invoke(args);
@@ -27,12 +29,12 @@ Command CreateAudioCommand()
     });
 
     var audioCmd = new Command("audio", description: "Keep and audio device Awake by playing inaudible sounds on repeat")
-{
-    deviceOpt,
-    delayOpt,
-    testOpt,
-    listAudioCmd
-};
+    {
+        deviceOpt,
+        delayOpt,
+        testOpt,
+        listAudioCmd
+    };
 
     audioCmd.SetHandler(async (int device, int delay, bool test, CancellationToken token) =>
     {
@@ -44,3 +46,31 @@ Command CreateAudioCommand()
 
     return audioCmd;
 };
+
+Command CreateScreenCommand()
+{
+    var displayOpt = new Option<bool>("--display", getDefaultValue: () => false, description: "Switch to ensure the display also doesn't go to sleep");
+    var timerOpt = new Option<int>("--timer", getDefaultValue: () => 0, description: "Set a timer in seconds for the Shake to keep the PC awake");
+
+    var cmd = new Command("screen", description: "Keep PC and screen awake using Execuion States")
+    {
+        displayOpt,
+        timerOpt
+    };
+
+    cmd.SetHandler(async (bool includeDisplay, int timer, CancellationToken token) =>
+    {
+        if (includeDisplay)
+        {
+            Console.WriteLine("Param: User selected to keep display awake as well");
+        }
+        if (timer != 0)
+        {
+            Console.WriteLine($"Param: Timer set for {timer} seconds");
+        }
+
+        await VideoUtils.SetupAwakeLoopAsync(includeDisplay, timer, token);
+    }, displayOpt, timerOpt);
+
+    return cmd;
+}

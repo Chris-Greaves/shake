@@ -15,8 +15,15 @@ namespace Shake.Core
 
         public static string GetAudioDeviceName(int deviceNumber)
         {
+            try
+            {
                 var caps = WaveOut.GetCapabilities(deviceNumber);
                 return caps.ProductName;
+            }
+            catch (NAudio.MmException)
+            {
+                return String.Empty;
+            }
         }
 
         public static async Task LoopAudioWithDelay(int deviceNumber, int delay, bool test, CancellationToken token)

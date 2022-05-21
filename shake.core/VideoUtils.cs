@@ -1,5 +1,4 @@
 ﻿using Shake.Core.KernalModels;
-using Timer = System.Timers.Timer;
 
 namespace Shake.Core
 {
@@ -14,7 +13,7 @@ namespace Shake.Core
         /// <returns></returns>
         public static async Task<bool> SetupAwakeLoopAsync(bool includeDisplay, int timer, CancellationToken token)
         {
-            return await Task.Run(() => SetupAwakeLoop(includeDisplay, timer, token), token);
+            return await Task.Run(() => AwakeLoop(includeDisplay, timer, token), token);
         }
 
         /// <summary>
@@ -24,7 +23,7 @@ namespace Shake.Core
         /// <param name="timer">Amount of time you want the loop to last, in seconds. If 0, it is infinite</param>
         /// <param name="token">Cancellation Token</param>
         /// <returns></returns>
-        public static bool SetupAwakeLoop(bool includeDisplay, int timer, CancellationToken token)
+        public static bool AwakeLoop(bool includeDisplay, int timer, CancellationToken token)
         {
             if (token.IsCancellationRequested)
                 return true; // Return true as although it didn't do anything, it also didn't go wrong.

@@ -1,4 +1,5 @@
 ﻿using Shake.Core.KernalModels;
+using Timer = System.Timers.Timer;
 
 namespace Shake.Core
 {
@@ -28,10 +29,8 @@ namespace Shake.Core
             if (token.IsCancellationRequested)
                 return true; // Return true as although it didn't do anything, it also didn't go wrong.
 
-            if (timer != 0)
-            {
-                throw new NotImplementedException("Timer functionality not implemented yet.");
-            }
+            // Create a token for the loop, with delay if timer is enabled.
+            var loopTokenSource = timer != 0 ? new CancellationTokenSource(timer * 1000) : new CancellationTokenSource();
 
             bool success;
             if (includeDisplay)
@@ -47,7 +46,7 @@ namespace Shake.Core
             {
                 if (success)
                 {
-                    WaitHandle.WaitAny(new[] { token.WaitHandle });
+                    WaitHandle.WaitAny(new[] { token.WaitHandle, loopTokenSource.Token.WaitHandle });
 
                     return success;
                 }

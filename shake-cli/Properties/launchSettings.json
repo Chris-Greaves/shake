@@ -1,8 +1,16 @@
 {
   "profiles": {
-    "shake-cli": {
+    "shake-cli screen": {
       "commandName": "Project",
       "commandLineArgs": "screen --display --timer 120"
+    },
+    "shake-cli audio": {
+      "commandName": "Project",
+      "commandLineArgs": "audio --device 50 --test"
+    },
+    "shake-cli audio list": {
+      "commandName": "Project",
+      "commandLineArgs": "audio list"
     }
   }
 }

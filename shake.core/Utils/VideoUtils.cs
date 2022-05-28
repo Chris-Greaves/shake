@@ -1,6 +1,6 @@
 ﻿using Shake.Core.KernalModels;
 
-namespace Shake.Core
+namespace Shake.Core.Utils
 {
     public static class VideoUtils
     {

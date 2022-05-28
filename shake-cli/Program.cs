@@ -1,4 +1,4 @@
-﻿using Shake.Core;
+﻿using Shake.Core.Utils;
 using System.CommandLine;
 
 var audioCmd = CreateAudioCommand();

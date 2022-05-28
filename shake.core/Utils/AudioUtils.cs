@@ -1,6 +1,6 @@
 ﻿using NAudio.Wave;
 
-namespace Shake.Core
+namespace Shake.Core.Utils
 {
     public static class AudioUtils
     {
@@ -22,7 +22,7 @@ namespace Shake.Core
             }
             catch (NAudio.MmException)
             {
-                return String.Empty;
+                return string.Empty;
             }
         }
 

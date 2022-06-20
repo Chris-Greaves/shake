@@ -1,20 +1,23 @@
 ﻿using Shake.Core.Utils;
+using Shake.Core.Utils.ConfigModels;
 using System.CommandLine;
 
 var audioCmd = CreateAudioCommand();
 var screenCmd = CreateScreenCommand();
+var configCmd = CreateConfigCommand();
 
 var root = new RootCommand
 {
     audioCmd,
-    screenCmd
+    screenCmd,
+    configCmd
 };
 
 return root.Invoke(args);
 
 Command CreateAudioCommand()
 {
-    var deviceOpt = new Option<int>("--device", description: "The audio device to keep awake. For Device list with device numbers see 'shake audio list'");
+    var deviceOpt = new Option<Guid>("--device", description: "The audio device to keep awake. For a list of devices with ids see 'shake audio list'");
     deviceOpt.AddAlias("-d");
     var delayOpt = new Option<int>("--delay", getDefaultValue: () => 5, description: "The delay between audio cues in seconds");
     var testOpt = new Option<bool>("--test", getDefaultValue: () => false, description: "Switch to use the audiable file to test it works");
@@ -37,7 +40,7 @@ Command CreateAudioCommand()
         listAudioCmd
     };
 
-    audioCmd.SetHandler(async (int device, int delay, bool test, CancellationToken token) =>
+    audioCmd.SetHandler(async (Guid device, int delay, bool test, CancellationToken token) =>
     {
         var deviceName = AudioUtils.GetAudioDeviceName(device);
         if (string.IsNullOrEmpty(deviceName))
@@ -62,7 +65,7 @@ Command CreateAudioCommand()
     }, deviceOpt, delayOpt, testOpt);
 
     return audioCmd;
-};
+}
 
 Command CreateScreenCommand()
 {
@@ -95,6 +98,123 @@ Command CreateScreenCommand()
 
         await VideoUtils.SetupAwakeLoopAsync(includeDisplay, timer, token);
     }, displayOpt, timerOpt);
+
+    return cmd;
+}
+
+Command CreateConfigCommand()
+{
+    var deviceOpt = new Option<Guid>("--device", description: "The audio device to keep awake. For a list of devices with ids see 'shake audio list'");
+    deviceOpt.AddAlias("-d");
+    var delayOpt = new Option<int>("--delay", getDefaultValue: () => 5, description: "The delay between audio cues in seconds");
+    var testOpt = new Option<bool>("--test", getDefaultValue: () => false, description: "Switch to use the audiable file to test it works");
+    var addAudioCmd = new Command("add-audio", description: "Add new audio shake")
+    {
+        deviceOpt,
+        delayOpt,
+        testOpt
+    };
+
+    addAudioCmd.SetHandler((Guid device, int delay, bool useTestAudio) =>
+    {
+        var config = ConfigUtils.GetConfig();
+
+        config.AudioShakes.Add(new AudioShake
+        {
+            AudioDevice = device,
+            Delay = delay,
+            UseTestAudio = useTestAudio
+        });
+
+        config.Save();
+    }, deviceOpt, delayOpt, testOpt);
+
+    addAudioCmd.SetHandler((Guid device, int delay, bool useTestAudio) =>
+    {
+        var config = ConfigUtils.GetConfig();
+
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        var random = new Random();
+        var id = new string(Enumerable.Repeat(chars, 8)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
+
+        config.AudioShakes.Add(new AudioShake
+        {
+            Id = id,
+            AudioDevice = device,
+            Delay = delay,
+            UseTestAudio = useTestAudio
+        });
+
+        config.Save();
+    }, deviceOpt, delayOpt, testOpt);
+
+    var audioIdArg = new Argument<string>("Shake Id", "The Id of the Audio shake you want to delete");
+    var removeAudioCmd = new Command("remove-audio", description: "Remove an audio shake")
+    {
+        audioIdArg
+    };
+
+    removeAudioCmd.SetHandler((string id) =>
+    {
+        var config = ConfigUtils.GetConfig();
+
+        var toDelete = config.AudioShakes.SingleOrDefault(a => a.Id == id);
+
+        if (toDelete is null)
+        {
+            return;
+        }
+
+        config.AudioShakes.Remove(toDelete);
+        config.Save();
+    }, audioIdArg);
+
+    var displayOpt = new Option<bool>("--display", getDefaultValue: () => false, description: "Switch to ensure the display also doesn't go to sleep");
+    displayOpt.AddAlias("-d");
+    var timerOpt = new Option<int>("--timer", getDefaultValue: () => 0, description: "Set a timer in seconds for the Shake to keep the PC awake");
+    timerOpt.AddAlias("-t");
+
+    var setScreenCmd = new Command("set-screen", description: "Set screen shake in config")
+    {
+        displayOpt,
+        timerOpt
+    };
+
+    setScreenCmd.SetHandler((bool includeDisplay, int timer) =>
+    {
+        var config = ConfigUtils.GetConfig();
+
+        config.VideoShake = new VideoShake
+        {
+            IncludeDisplay = includeDisplay,
+            Timer = timer
+        };
+
+        config.Save();
+    }, displayOpt, timerOpt);
+
+    var clearScreenCmd = new Command("clear-screen", description: "Clear any screen settings from config");
+
+    clearScreenCmd.SetHandler(() =>
+    {
+        var config = ConfigUtils.GetConfig();
+        config.VideoShake = null;
+        config.Save();
+    });
+
+    var cmd = new Command("config", description: "Update the global config for shake.")
+    {
+        addAudioCmd,
+        removeAudioCmd,
+        setScreenCmd,
+        clearScreenCmd
+    };
+
+    cmd.SetHandler(() =>
+    {
+        Console.Write(ConfigUtils.GetConfigAsString());
+    });
 
     return cmd;
 }

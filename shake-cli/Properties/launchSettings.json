@@ -6,11 +6,31 @@
     },
     "shake-cli audio": {
       "commandName": "Project",
-      "commandLineArgs": "audio --device 50 --test"
+      "commandLineArgs": "audio --device 13f43cdd-e1de-44f7-8683-863db20794cc --test"
     },
     "shake-cli audio list": {
       "commandName": "Project",
       "commandLineArgs": "audio list"
+    },
+    "shake-cli config": {
+      "commandName": "Project",
+      "commandLineArgs": "config"
+    },
+    "shake-cli config add-audio": {
+      "commandName": "Project",
+      "commandLineArgs": "config add-audio --device 13f43cdd-e1de-44f7-8683-863db20794cc --test"
+    },
+    "shake-cli config remove-audio": {
+      "commandName": "Project",
+      "commandLineArgs": "config remove-audio 91367XTF"
+    },
+    "shake-cli config set-video": {
+      "commandName": "Project",
+      "commandLineArgs": "config set-video --display --timer 120"
+    },
+    "shake-cli config clear-video": {
+      "commandName": "Project",
+      "commandLineArgs": "config clear-video"
     }
   }
 }

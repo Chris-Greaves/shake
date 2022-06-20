@@ -6,32 +6,42 @@ namespace Shake.Core.Utils
     {
         public static IEnumerable<string> GetAudioDevices()
         {
-            for (int n = -1; n < WaveOut.DeviceCount; n++)
+            //for (int n = -1; n < WaveOut.DeviceCount; n++)
+            //{
+            //    var caps = WaveOut.GetCapabilities(n);
+            //    yield return $"{n}: {caps.ProductName} | {caps.NameGuid}";
+            //}
+
+            foreach (var dev in DirectSoundOut.Devices)
             {
-                var caps = WaveOut.GetCapabilities(n);
-                yield return $"{n}: {caps.ProductName}";
+                yield return $"{dev.Guid} | {dev.Description}";
             }
         }
 
-        public static string GetAudioDeviceName(int deviceNumber)
+        public static string GetAudioDeviceName(Guid deviceId)
         {
-            try
-            {
-                var caps = WaveOut.GetCapabilities(deviceNumber);
-                return caps.ProductName;
-            }
-            catch (NAudio.MmException)
-            {
-                return string.Empty;
-            }
+            //try
+            //{
+                //var caps = WaveOut.GetCapabilities(deviceNumber);
+                //return caps.ProductName;
+
+            var device = DirectSoundOut.Devices.SingleOrDefault(d => d.Guid == deviceId);
+
+            return device is null ? String.Empty : device.Description;
+
+            //}
+            //catch (NAudio.MmException)
+            //{
+            //    return string.Empty;
+            //}
         }
 
-        public static async Task LoopAudioWithDelay(int deviceNumber, int delay, bool test, CancellationToken token)
+        public static async Task LoopAudioWithDelay(Guid deviceId, int delay, bool test, CancellationToken token)
         {
             var audioFileLocation = test ? "./Sounds/test.wav" : "./Sounds/anti-sleep.wav";
 
             using (var audioReader = new AudioFileReader(audioFileLocation))
-            using (var outputDevice = new WaveOutEvent() { DeviceNumber = deviceNumber })
+            using (var outputDevice = new DirectSoundOut(deviceId))
             {
                 outputDevice.Init(audioReader);
                 while (!token.IsCancellationRequested)

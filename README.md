@@ -14,7 +14,7 @@ I chose this name for two reasons, firstly it kinda sounds like awake, and secon
         - [x] Ability to control the delay between anti-sleep beeps
         - [x] Ability to specify the audio device to keep awake
         - [x] Extra test audio file to ensure that the correct sound device is being kept awake.
-        - [ ] Ability to run multiple 'shakes' from a config (Used for 'on startup')
+        - [x] Ability to run multiple 'shakes' from a config (Used for 'on startup')
     - [x] Ability to keep the screen awake
 		- [x] Ability to set a timer for keeping the screen awake
     - [ ] Ability to move the mouse after a period of time idle (*)

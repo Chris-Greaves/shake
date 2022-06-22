@@ -1,5 +1,6 @@
 ﻿using Shake.Core.Utils;
 using Shake.Core.Utils.ConfigModels;
+using System;
 using System.CommandLine;
 
 var audioCmd = CreateAudioCommand();
@@ -119,20 +120,6 @@ Command CreateConfigCommand()
     {
         var config = ConfigUtils.GetConfig();
 
-        config.AudioShakes.Add(new AudioShake
-        {
-            AudioDevice = device,
-            Delay = delay,
-            UseTestAudio = useTestAudio
-        });
-
-        config.Save();
-    }, deviceOpt, delayOpt, testOpt);
-
-    addAudioCmd.SetHandler((Guid device, int delay, bool useTestAudio) =>
-    {
-        var config = ConfigUtils.GetConfig();
-
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         var random = new Random();
         var id = new string(Enumerable.Repeat(chars, 8)
@@ -203,12 +190,46 @@ Command CreateConfigCommand()
         config.Save();
     });
 
+    var watchOpt = new Option<bool>(new string[] { "--watch", "-w" }, "Set flag to watch for changes in the config and re-run on change");
+    var runCmd = new Command("run", "Runs all shakes defined in the current global config")
+    {
+        watchOpt
+    };
+
+    runCmd.SetHandler(async (bool watch, CancellationToken token) =>
+    {
+        while (!token.IsCancellationRequested)
+        {
+            var config = ConfigUtils.GetConfig();
+
+            if (watch)
+            {
+                using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token))
+                using (var watcher = ConfigUtils.SetupConfigWatch((object sender, FileSystemEventArgs e) =>
+                {
+                    Console.WriteLine("Config changed, refreshing");
+                    tokenSource.Cancel();
+                }))
+                {
+                    try
+                    {
+                        await RunConfig(config, tokenSource.Token);
+                    }
+                    catch (OperationCanceledException) { }
+                }
+            }
+            else
+                await RunConfig(config, token);
+        }
+    }, watchOpt);
+
     var cmd = new Command("config", description: "Update the global config for shake.")
     {
         addAudioCmd,
         removeAudioCmd,
         setScreenCmd,
-        clearScreenCmd
+        clearScreenCmd,
+        runCmd
     };
 
     cmd.SetHandler(() =>
@@ -217,4 +238,21 @@ Command CreateConfigCommand()
     });
 
     return cmd;
+}
+
+static async Task RunConfig(ShakeOptions config, CancellationToken token)
+{
+    var shakes = new List<Task>();
+
+    foreach (var aShake in config.AudioShakes)
+    {
+        shakes.Add(AudioUtils.LoopAudioWithDelay(aShake.AudioDevice, aShake.Delay, aShake.UseTestAudio, token));
+    }
+
+    if (config.VideoShake is not null)
+    {
+        shakes.Add(VideoUtils.SetupAwakeLoopAsync(config.VideoShake.IncludeDisplay, config.VideoShake.Timer, token));
+    }
+
+    await Task.WhenAll(shakes.AsEnumerable());
 }

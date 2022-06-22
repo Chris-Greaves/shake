@@ -31,6 +31,10 @@
     "shake-cli config clear-video": {
       "commandName": "Project",
       "commandLineArgs": "config clear-video"
+    },
+    "shake-cli config run": {
+      "commandName": "Project",
+      "commandLineArgs": "config run -w"
     }
   }
 }
